@@ -44,6 +44,7 @@ class OrgConfig(BaseConfig):
     instance_url: str
     expires: str  # TODO: note that ScratchOrgConfig has a bool method of same name
     expired: bool  # ditto
+    github_environment: str
     is_sandbox: bool
     namespace: str
     namespaced: bool

@@ -12,6 +12,11 @@ from cumulusci.cli.ui import CliTable, SimpleSalesforceUIHelpers
 from cumulusci.core.config import OrgConfig, ScratchOrgConfig
 from cumulusci.core.config.sfdx_org_config import SfdxOrgConfig
 from cumulusci.core.exceptions import OrgNotFound
+from cumulusci.core.github import (
+    add_org_to_environment,
+    get_org_from_environment,
+    list_environments,
+)
 from cumulusci.oauth.client import (
     PROD_LOGIN_URL,
     SANDBOX_LOGIN_URL,
@@ -233,6 +238,46 @@ def org_default(runtime, org_name, unset):
             click.echo(f"{orgname} is the default org")
         else:
             click.echo("There is no default org")
+
+@org.command(name="github_export", help="Exports an org to a GitHub Environment")
+@click.argument("environment")
+@orgname_option_or_argument(required=True)
+@pass_runtime(require_keychain=True)
+def org_github_export(runtime: CliRuntime, environment: str, org_name: str):
+    org = runtime.keychain.get_org(org_name)
+    resp = add_org_to_environment(
+        runtime.project_config.get_repo(), 
+        org,
+        environment, 
+    )
+    click.echo(
+        f"Exported org: {org.org_id} as GitHub Environment {environment}. Response: {resp}"
+    )
+
+@org.command(name="github_import", help="Import an org from a GitHub Environment")
+@click.argument("environment")
+@orgname_option_or_argument(required=True)
+@pass_runtime(require_keychain=True)
+def org_github_import(runtime: CliRuntime, environment: str, org_name: str):
+    org = get_org_from_environment(
+        runtime.project_config.get_repo(), 
+        environment, 
+        org_name,
+        runtime.keychain, 
+    )
+    runtime.keychain.set_org(org)
+    click.echo(
+        f"Imported org: {org.org_id}, username: {org.username}"
+    )
+
+@org.command(name="github_list", help="List GitHub Environment names")
+@pass_runtime(require_keychain=True)
+def org_github_list(runtime: CliRuntime):
+    envs = list_environments(
+        runtime.project_config.get_repo(),   
+    )
+    for env in envs:
+        click.echo("  " + env)
 
 
 @org.command(name="import", help="Import an org from Salesforce DX")

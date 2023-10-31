@@ -1,5 +1,7 @@
+import datetime
 import functools
 import io
+import json
 import os
 import re
 import time
@@ -28,6 +30,7 @@ from requests.models import Response
 from requests.packages.urllib3.util.retry import Retry
 from rich.console import Console
 
+from cumulusci.core.config.scratch_org_config import ScratchOrgConfig
 from cumulusci.core.exceptions import (
     DependencyLookupError,
     GithubApiError,
@@ -658,8 +661,48 @@ def get_oauth_device_flow_token():
 def create_gist(github, description, files):
     """Creates a gist with the given description and files.
 
-    github - an
+    github - an instance of the GitHub repo's api wrapper
     description - str
     files - A dict of files in the form of {filename:{'content': content},...}
     """
     return github.create_gist(description, files, public=False)
+
+@catch_common_github_auth_errors
+def get_org_from_environment(github, env_name, org_name, keychain):
+    """Gets the dictionary of org config from a GitHub Environment.
+
+    github - an instance of the GitHub repo's api wrapper
+    env_name - the name of the GitHub Environment
+    """
+    resp = github._get(f"{github.url}/environments/{env_name}/variables/ORG_CONFIG")
+    org_config = json.loads(resp.json().get("value"))
+    org_config["github_environment"] = env_name
+    org_config["date_created"] = datetime.datetime.fromisoformat(org_config["date_created"])
+    return ScratchOrgConfig(org_config, org_name, keychain=keychain)
+
+@catch_common_github_auth_errors
+def list_environments(github):
+    """Lists the GitHub Environments for the repo.
+
+    github - an instance of the GitHub repo's api wrapper
+    """
+    resp = github._get(f"{github.url}/environments")
+    return [env["name"] for env in resp.json().get("environments")]
+
+@catch_common_github_auth_errors
+def add_org_to_environment(github, org:ScratchOrgConfig, env_name:str):
+    """Creates a GitHub deployment environment for the given org.
+
+    github - an instance of the GitHub repo's api wrapper
+    org - the OrgConfig instance for the org
+    env_name - the name of the GitHub Environment
+    """
+    resp = github._put(f"{github.url}/environments/{env_name}")
+    org.config["github_environment"] = env_name
+    org.config["date_created"] = org.config["date_created"].isoformat()
+    resp = github._post(
+        f"{github.url}/environments/{env_name}/variables",
+        data={"name": "ORG_CONFIG", "value": json.dumps(org.config)}
+    )
+    return resp.json()
+
