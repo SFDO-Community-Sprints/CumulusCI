@@ -29,7 +29,7 @@ class SfdxOrgConfig(OrgConfig):
 
         # Call force:org:display and parse output to get instance_url and
         # access_token
-        p = sfdx("force:org:display --json", self.username)
+        p = sfdx("force:org:display --json --verbose", self.username)
 
         org_info = None
         stderr_list = [line.strip() for line in p.stderr_text]
@@ -60,6 +60,7 @@ class SfdxOrgConfig(OrgConfig):
             "access_token": org_info["result"]["accessToken"],
             "org_id": org_id,
             "username": org_info["result"]["username"],
+            "sfdx_auth_url": org_info["result"]["sfdxAuthUrl"],
         }
         if org_info["result"].get("password"):
             sfdx_info["password"] = org_info["result"]["password"]

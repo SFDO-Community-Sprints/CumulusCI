@@ -1,6 +1,7 @@
 import code
 import json
 import runpy
+import tempfile
 import webbrowser
 from datetime import datetime
 from urllib.parse import urlencode, urlparse
@@ -14,9 +15,10 @@ from cumulusci.core.config.sfdx_org_config import SfdxOrgConfig
 from cumulusci.core.exceptions import OrgNotFound
 from cumulusci.core.github import (
     add_org_to_environment,
-    get_org_from_environment,
+    get_org_config_from_environment,
     list_environments,
 )
+from cumulusci.core.sfdx import sfdx
 from cumulusci.oauth.client import (
     PROD_LOGIN_URL,
     SANDBOX_LOGIN_URL,
@@ -259,12 +261,20 @@ def org_github_export(runtime: CliRuntime, environment: str, org_name: str):
 @orgname_option_or_argument(required=True)
 @pass_runtime(require_keychain=True)
 def org_github_import(runtime: CliRuntime, environment: str, org_name: str):
-    org = get_org_from_environment(
+    org_config = get_org_config_from_environment(
         runtime.project_config.get_repo(), 
         environment, 
         org_name,
         runtime.keychain, 
     )
+    with tempfile.NamedTemporaryFile() as f:
+        f.write(org_config["sfdx_auth_url"].encode())
+        f.flush()
+        sfdx(f"force:auth:sfdxurl:store "
+             f"--sfdxurlfile={f.name} "
+             f"--setalias {runtime.project_config.project__name}__{org_name}"
+        )
+    org = ScratchOrgConfig(org_config, org_name, runtime.keychain)
     runtime.keychain.set_org(org)
     click.echo(
         f"Imported org: {org.org_id}, username: {org.username}"

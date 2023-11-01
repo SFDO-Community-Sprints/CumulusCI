@@ -668,7 +668,7 @@ def create_gist(github, description, files):
     return github.create_gist(description, files, public=False)
 
 @catch_common_github_auth_errors
-def get_org_from_environment(github, env_name, org_name, keychain):
+def get_org_config_from_environment(github, env_name, org_name, keychain):
     """Gets the dictionary of org config from a GitHub Environment.
 
     github - an instance of the GitHub repo's api wrapper
@@ -678,7 +678,8 @@ def get_org_from_environment(github, env_name, org_name, keychain):
     org_config = json.loads(resp.json().get("value"))
     org_config["github_environment"] = env_name
     org_config["date_created"] = datetime.datetime.fromisoformat(org_config["date_created"])
-    return ScratchOrgConfig(org_config, org_name, keychain=keychain)
+
+    return org_config
 
 @catch_common_github_auth_errors
 def list_environments(github):
