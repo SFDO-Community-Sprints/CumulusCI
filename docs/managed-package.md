@@ -43,21 +43,21 @@ If you haven't created a managed package project, follow these steps:
 
 ## Deploy to a Packaging Org
 
-CumulusCI deploys metadata to a `packaging` org with the `ci_master`
+CumulusCI deploys metadata to a `packaging` org with the `ci_packaging`
 flow.
 
 ```{warning}
-The `ci_master` flow runs the
+The `ci_packaging` flow runs the
 [](uninstall-packaged-incremental) task,
 which deletes any metadata from the package in the target org that's
 not in the repository.
 ```
 
 ```console
-$ cci flow run ci_master --org packaging
+$ cci flow run ci_packaging --org packaging
 ```
 
-The `ci_master` flow executes these tasks in the target org.
+The `ci_packaging` flow executes these tasks in the target org.
 
 -   Updates any project dependencies
 -   Deploys any unpackaged metadata located in the `pre` directory
@@ -68,12 +68,12 @@ The `ci_master` flow executes these tasks in the target org.
     the [](update-admin-profile) task.
 
 ```{tip}
-To list each step in the `ci_master` flow, run
-`cci flow info ci_master`.
+To list each step in the `ci_packaging` flow, run
+`cci flow info ci_packaging`.
 ```
 
 CumulusCI separates uploading metadata to the packaging org and
-releasing a beta version of the package into the `ci_master` and
+releasing a beta version of the package into the `ci_packaging` and
 `release_beta` flows, respectively. This separation offers discretion to
 run additional checks against the org, if necessary, between deploy and
 release steps.
@@ -101,7 +101,7 @@ it:
 
 ```{important}
 This flow assumes that the package contents were already deployed using
-the `ci_master` flow. It does _not_ include a step to deploy them.
+the `ci_packaging` flow. It does _not_ include a step to deploy them.
 ```
 
 To create a new beta version for your project without the bells and
@@ -136,7 +136,7 @@ notes for the new version.
 
 ```{important}
 This flow assumes that the package contents have previously been
-deployed using the `ci_master` flow.
+deployed using the `ci_packaging` flow.
 ```
 
 To upload the new production version without creating the GitHub tag and

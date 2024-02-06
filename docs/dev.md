@@ -591,7 +591,7 @@ Each flow that resolves dependencies selects a resolution strategy that
 meets its needs. Two aliases, `production`, and `preproduction`, are
 defined for this purpose, because in many cases a development flow like
 `dev_org` or `install_beta` will want to utilize a _different_
-resolution strategy than a production flow like `ci_master` or
+resolution strategy than a production flow like `ci_packaging` or
 `install_prod`.
 
 By default, both `production` and `preproduction` use the

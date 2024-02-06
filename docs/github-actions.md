@@ -127,10 +127,10 @@ You can choose whether or not to pin to a version tag in your cloned `standard-w
 If you prefer to construct your own workflows, you can consume our job-based Actions as building blocks. Each job-based Action will set up
 the CumulusCI and SFDX CLIs, authorize a Dev Hub and/or packaging org, check out the project, and run one or more Cumulus flows and tasks.
 
--   `cumulus-actions/release-beta-1gp` runs the flows `ci_master` and `release_beta`.
+-   `cumulus-actions/release-beta-1gp` runs the flows `ci_packaging` and `release_beta`.
 -   `cumulus-actions/release-beta-2gp` runs the flow `release_beta_2gp`.
 -   `cumulus-actions/beta-test` runs the flow `ci_beta`.
--   `cumulus-actions/release-production-1gp` runs the flows `ci_master` and `release_production`.
+-   `cumulus-actions/release-production-1gp` runs the flows `ci_packaging` and `release_production`.
 -   `cumulus-actions/release-production-2gp` runs the flow `release_production_2gp`.
 -   `cumulus-actions/release-test` runs the flow `ci_release`.
 -   `cumulus-actions/build-unlocked-test-package` runs the flow `build_unlocked_test_package` and populates the package id onto a commit status.

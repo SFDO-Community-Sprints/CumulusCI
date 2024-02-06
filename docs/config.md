@@ -443,11 +443,11 @@ Specify options on specific tasks in a flow with this syntax:
 
 Replace all objects with `<>` with the desired values.
 
-For example, let's examine the definition of the `ci_master` flow from
+For example, let's examine the definition of the `ci_packaging` flow from
 the universal `cumulusci.yml` file.
 
 ```
-ci_master:
+ci_packaging:
     group: Continuous Integration
     description: Deploy the package metadata to the packaging org and prepare for managed package version upload.  Intended for use against main branch commits.
     steps:

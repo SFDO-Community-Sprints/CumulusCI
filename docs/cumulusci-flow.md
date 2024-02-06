@@ -61,7 +61,7 @@ of the Pull Requests merged since the last production release.
 
 There are three main flows that facilitate main builds:
 
--   `ci_master`: Deploys the main branch and all dependencies into the
+-   `ci_packaging`: Deploys the main branch and all dependencies into the
     packaging org including incrementally deleting any metadata removed
     since the previous deployment. The end result is to prepare the
     packaging org to upload a new version.

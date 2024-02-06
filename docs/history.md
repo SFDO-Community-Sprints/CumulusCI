@@ -5612,7 +5612,7 @@ Resolving a few issues from beta77:
 -   New flows:
     -   ci_feature: Runs a full deployment of the unmanaged code for
         testing in a feature org
-    -   ci_master: Runs a full deployment of the managed version of the
+    -   ci_packaging: Runs a full deployment of the managed version of the
         code into the packaging org
     -   ci_beta: Installs the latest beta and runs all tests
     -   ci_release: Installs the latest release and runs all tests

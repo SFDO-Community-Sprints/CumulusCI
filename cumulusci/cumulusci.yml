@@ -739,6 +739,13 @@ tasks:
         class_path: cumulusci.tasks.vlocity.vlocity.VlocityDeployTask
         description: "Executes the `vlocity packDeploy` command against an org"
         group: OmniStudio
+
+deprecations:
+    flows:
+        ci_master:
+            replacement: ci_packaging
+            level: warning #default level
+
 flows:
     ci_beta:
         group: Continuous Integration
@@ -804,7 +811,8 @@ flows:
                 flow: config_apextest
             3:
                 task: run_tests
-    ci_master:
+
+    ci_packaging:
         group: Continuous Integration
         description: Deploy the package metadata to the packaging org and prepare for managed package version upload.  Intended for use against main branch commits.
         steps:
