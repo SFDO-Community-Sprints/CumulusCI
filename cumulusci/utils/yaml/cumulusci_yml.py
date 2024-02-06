@@ -4,7 +4,8 @@ Pydantic models for validating cumulusci.yml
 Note: If you change the model here, you should run `make schema`
 to update the JSON Schema version in cumulusci.jsonschema.json
 """
-
+import logging
+from enum import Enum
 from logging import getLogger
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Union
@@ -223,10 +224,29 @@ class CumulusCLIConfig(CCIDictModel):
     show_stacktraces: bool = False
     plain_output: bool = None
 
+class LogLevel(Enum):
+    info = logging.INFO
+    warning = logging.WARNING
+    error = logging.ERROR
+
+class Deprecation(CCIDictModel):
+    replacement: str = None
+    url: str = Field(
+        None,
+        title="Deprecation URL",
+        description="The URL of the documentation for the replacement feature.",
+        examples=["https://github.com/SFDO-Tooling/CumulusCI/releases/tag/v3.84.1"],
+    )
+    level:  LogLevel = Field(
+        LogLevel.warning,
+        title="Deprecation Level",
+        description="The logging level at which to log or display a deprecation message. An error of level will additionally raise an exception.",
+    )
 
 class CumulusCIRoot(CCIDictModel):
     tasks: Dict[str, Task] = {}
     flows: Dict[str, Flow] = {}
+    deprecations: Dict[str, Deprecation] = {}
     project: Project = {}
     orgs: Orgs = {}
     services: Dict[str, Service] = {}

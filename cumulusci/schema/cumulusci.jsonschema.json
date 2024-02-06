@@ -18,6 +18,14 @@
                 "$ref": "#/definitions/Flow"
             }
         },
+        "deprecations": {
+            "title": "Deprecations",
+            "default": {},
+            "type": "object",
+            "additionalProperties": {
+                "$ref": "#/definitions/Deprecation"
+            }
+        },
         "project": {
             "title": "Project",
             "default": {},
@@ -200,6 +208,40 @@
                 "group": {
                     "title": "Group",
                     "type": "string"
+                }
+            },
+            "additionalProperties": false
+        },
+        "LogLevel": {
+            "title": "LogLevel",
+            "description": "An enumeration.",
+            "enum": [20, 30, 40]
+        },
+        "Deprecation": {
+            "title": "Deprecation",
+            "type": "object",
+            "properties": {
+                "replacement": {
+                    "title": "Replacement",
+                    "type": "string"
+                },
+                "url": {
+                    "title": "Deprecation URL",
+                    "description": "The URL of the documentation for the replacement feature.",
+                    "examples": [
+                        "https://github.com/SFDO-Tooling/CumulusCI/releases/tag/v3.84.1"
+                    ],
+                    "type": "string"
+                },
+                "level": {
+                    "title": "Deprecation Level",
+                    "description": "The logging level at which to log or display a deprecation message. An error of level will additionally raise an exception.",
+                    "default": 30,
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/LogLevel"
+                        }
+                    ]
                 }
             },
             "additionalProperties": false
