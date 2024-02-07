@@ -61,6 +61,13 @@ tasks:
             sql_path: cumulusci/tasks/bulkdata/tests/person_accounts.sql
             mapping: cumulusci/tasks/bulkdata/tests/person_accounts.yml
 
+deprecations:
+    flows:
+        ci_nonsense:
+            replacement: ci_master
+            level: warning
+            url: https://cumulusci.readthedocs.io/en/latest/flows.html#ci_packaging
+
 flows:
     ci_nonsense:
         steps:

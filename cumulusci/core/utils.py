@@ -179,18 +179,21 @@ def process_deprecations(configs: T.Dict[str, dict]) -> T.Dict[str, dict]:
 
     merged_config = {}
     logger = getLogger(__file__)
+    messages = {}
+    replacements = {}
 
     for config_title, config in configs.items():
-
+        merged_config = dictmerge(merged_config, config, config_title)
         for type_name, type_deprecations in config.get("deprecations", {}).items():
             for item, deprecation in type_deprecations.items():
-                deprecation["source"] = config_title
-        for key, value in config.items():
-            merged_config.get("key", {}).update(value)
+                merged_config["deprecations"][type_name][item]["source"] = config_title
+
         for type_name, type_items in config.items():
+
             for name, deprecation in (
                 merged_config.get("deprecations", {}).get(type_name, {}).items()
             ):
+
                 if name in config.get(type_name, {}):
                     level = deprecation.get("level", "warning")
                     message = f"{type_name.capitalize()[:-1]} `{name}` is deprecated."
@@ -208,7 +211,8 @@ def process_deprecations(configs: T.Dict[str, dict]) -> T.Dict[str, dict]:
                                 f"Deprecation for  {type_name[:-1]} `{name}` is misconfigured. Replacement `{replacement}` is not defined",
                                 config_name=config_title,
                             )
-
+                        replacements.setdefault(type_name, {})
+                        replacements[type_name][name] = replacement
                     else:
                         # If no replacement is defined, check if the level is set to "error" (required)
                         if level != "error":
@@ -216,10 +220,6 @@ def process_deprecations(configs: T.Dict[str, dict]) -> T.Dict[str, dict]:
                                 f"{type_name.capitalize()[:-1]} `{name}` is misconfigured. Define a replacement to use level `{level}`",
                                 config_name=deprecation["source"],
                             )
-                    # Raise a deprecation error if the level is set to "error"
-                    if level == "error":
-                        logger.error(message)
-                        raise DeprecationError(message)
 
                     if replacement:
                         if replacement in type_items and name in type_items:
@@ -228,11 +228,20 @@ def process_deprecations(configs: T.Dict[str, dict]) -> T.Dict[str, dict]:
                             )
 
                         type_items[replacement] = type_items.pop(name)
+                    messages.setdefault(level, [])
+                    messages[level].append(message)
 
-                    if level == "warning":
-                        logger.warning("WARNING: " + message)
-                    elif level == "info":
-                        logger.info(message)
+    for level, level_messages in messages.items():
+        for message in level_messages:
+            if level == "warning":
+                logger.warning("WARNING: " + message)
+            elif level == "info":
+                logger.info(message)
+            else:  # level == "error"
+                logger.error("ERROR: " + message)
+
+    if "errors" in messages and len(messages["errors"]) > 0:
+        raise DeprecationError("\n".join(messages["errors"]))
 
     return configs
 
