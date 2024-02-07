@@ -47,6 +47,14 @@
         "cumulusci": {
             "$ref": "#/definitions/CumulusCIConfig"
         },
+        "plugins": {
+            "title": "Plugins",
+            "default": [],
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
         "plans": {
             "title": "Plans",
             "default": {},

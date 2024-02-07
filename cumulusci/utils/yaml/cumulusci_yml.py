@@ -231,6 +231,7 @@ class CumulusCIRoot(CCIDictModel):
     orgs: Orgs = {}
     services: Dict[str, Service] = {}
     cumulusci: CumulusCIConfig = None
+    plugins: List[str] = []
     plans: Dict[str, Plan] = {}
     minimum_cumulusci_version: str = None
     sources: Dict[str, Union[LocalFolderSourceModel, GitHubSourceModel]] = {}
