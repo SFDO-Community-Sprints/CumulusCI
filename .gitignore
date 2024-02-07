@@ -29,6 +29,7 @@ var/
 .pdbrc.py
 .python-version
 venv/
+cci_venv/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

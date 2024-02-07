@@ -62,6 +62,17 @@ tasks:
             mapping: cumulusci/tasks/bulkdata/tests/person_accounts.yml
 
 flows:
+    ci_nonsense:
+        steps:
+            1:
+                flow: ci_master
+    ci_master:
+        group: Continuous Integration
+        description: Deploy the package metadata to the packaging org and prepare for managed package version upload.  Intended for use against main branch commits.
+        steps:
+            1:
+                flow: None
+
     robot_docs:
         description: Generates documentation for robot framework libraries
         steps:

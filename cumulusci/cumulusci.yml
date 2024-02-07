@@ -744,7 +744,8 @@ deprecations:
     flows:
         ci_master:
             replacement: ci_packaging
-            level: warning #default level
+            level: warning
+            url: https://cumulusci.readthedocs.io/en/latest/flows.html#ci_packaging
 
 flows:
     ci_beta:
@@ -811,7 +812,6 @@ flows:
                 flow: config_apextest
             3:
                 task: run_tests
-
     ci_packaging:
         group: Continuous Integration
         description: Deploy the package metadata to the packaging org and prepare for managed package version upload.  Intended for use against main branch commits.

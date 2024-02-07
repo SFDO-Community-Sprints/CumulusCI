@@ -38,7 +38,20 @@ class BaseTaskFlowConfig(BaseConfig):
     def get_task(self, name: str) -> TaskConfig:
         """Returns a TaskConfig"""
         config = self.lookup(f"tasks__{name}")
+
+        if not config:
+            # look for deprecations of task with replacement and use replacement instead
+            deprecation = self.lookup(f"deprecations__tasks__{name}")
+            if deprecation and "replacement" in deprecation:
+                replacement = deprecation["replacement"]
+                config = self.lookup(f"tasks__{replacement}")
+
         if not config and name not in self.tasks:
+            if config:
+                # task exists and there is a config but it has no class_path defined and it is not a base task override
+                error_msg = f"Task has no class_path defined: {name}"
+                raise CumulusCIException(error_msg)
+
             # task does not exist
             error_msg = f"Task not found: {name}"
             suggestion = self.get_suggested_name(name, self.tasks)
@@ -65,6 +78,12 @@ class BaseTaskFlowConfig(BaseConfig):
     def get_flow(self, name: str) -> FlowConfig:
         """Returns a FlowConfig"""
         config = self.lookup(f"flows__{name}")
+        if not config:
+            # look for deprecations of task with replacement and use replacement instead
+            deprecation = self.lookup(f"deprecations__flows__{name}")
+            if deprecation and "replacement" in deprecation:
+                replacement = deprecation["replacement"]
+                config = self.lookup(f"flows__{replacement}")
         if not config:
             error_msg = f"Flow not found: {name}"
             suggestion = self.get_suggested_name(name, self.flows)

@@ -14,8 +14,10 @@ import pytz
 
 from cumulusci.core.debug import get_debug_mode
 from cumulusci.core.exceptions import (
+    ConfigError,
     ConfigMergeError,
     CumulusCIException,
+    DeprecationError,
     TaskOptionsError,
 )
 from cumulusci.utils.options import parse_list_of_pairs_dict_arg
@@ -162,6 +164,7 @@ def merge_config(configs):
     one another (highest priority comes first)
     """
     config_copies = {name: copy.deepcopy(config) for name, config in configs.items()}
+    config_copies = process_deprecations(config_copies)
     cleaned_configs = cleanup_flow_step_override_conflicts(config_copies)
 
     new_config = {}
@@ -169,6 +172,69 @@ def merge_config(configs):
         new_config = dictmerge(new_config, config, name)
 
     return new_config
+
+
+def process_deprecations(configs: T.Dict[str, dict]) -> T.Dict[str, dict]:
+    """Process any deprecations for the given configs."""
+
+    merged_config = {}
+    logger = getLogger(__file__)
+
+    for config_title, config in configs.items():
+
+        for type_name, type_deprecations in config.get("deprecations", {}).items():
+            for item, deprecation in type_deprecations.items():
+                deprecation["source"] = config_title
+        for key, value in config.items():
+            merged_config.get("key", {}).update(value)
+        for type_name, type_items in config.items():
+            for name, deprecation in (
+                merged_config.get("deprecations", {}).get(type_name, {}).items()
+            ):
+                if name in config.get(type_name, {}):
+                    level = deprecation.get("level", "warning")
+                    message = f"{type_name.capitalize()[:-1]} `{name}` is deprecated."
+                    replacement = deprecation.get("replacement")
+
+                    # Determine whether a replacement is defined for the deprecated flow or task
+                    if replacement:
+
+                        # Prepare the replacement message
+                        message += f" Use the `{replacement}` {type_name[:-1]} instead of `{name}`."
+
+                        # Check if the replacement exists in the config
+                        if replacement not in merged_config.get(type_name, {}):
+                            raise ConfigError(
+                                f"Deprecation for  {type_name[:-1]} `{name}` is misconfigured. Replacement `{replacement}` is not defined",
+                                config_name=config_title,
+                            )
+
+                    else:
+                        # If no replacement is defined, check if the level is set to "error" (required)
+                        if level != "error":
+                            raise ConfigError(
+                                f"{type_name.capitalize()[:-1]} `{name}` is misconfigured. Define a replacement to use level `{level}`",
+                                config_name=deprecation["source"],
+                            )
+                    # Raise a deprecation error if the level is set to "error"
+                    if level == "error":
+                        logger.error(message)
+                        raise DeprecationError(message)
+
+                    if replacement:
+                        if replacement in type_items and name in type_items:
+                            raise DeprecationError(
+                                f"{type_name.capitalize()[:-1]} `{name}` is deprecated but still defined, and replacement `{replacement}` is also defined in {config_title}. Move `{name}` customizations to `{replacement}`"
+                            )
+
+                        type_items[replacement] = type_items.pop(name)
+
+                    if level == "warning":
+                        logger.warning("WARNING: " + message)
+                    elif level == "info":
+                        logger.info(message)
+
+    return configs
 
 
 def cleanup_flow_step_override_conflicts(configs: T.List[dict]) -> T.List[dict]:

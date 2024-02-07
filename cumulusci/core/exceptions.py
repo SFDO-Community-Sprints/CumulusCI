@@ -98,6 +98,13 @@ class ConfigError(CumulusCIException):
         return f"{self.message} for config {self.config_name}"
 
 
+class DeprecationError(ConfigError):
+    """Raised when a deprecated configuration is used with a level of error."""
+
+    def __str__(self):
+        return f"{self.message}."
+
+
 class ConfigMergeError(ConfigError):
     """Raised when merging configuration fails."""
 
